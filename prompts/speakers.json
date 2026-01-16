@@ -1,0 +1,22 @@
+{
+  "context_clues": {
+    "interviewer_indicators": [
+      "Asks questions",
+      "Uses phrases like 'Can you explain', 'What do you think', 'Tell us about'",
+      "Introduces topics",
+      "Prompts for elaboration",
+      "Thanks guests or wraps up segments"
+    ],
+    "guest_indicators": [
+      "Provides detailed explanations",
+      "References research or data",
+      "Offers opinions with supporting evidence",
+      "Uses academic or technical language",
+      "Responds to questions rather than asking them"
+    ]
+  },
+  "speaker_descriptions": {
+    "Justin Wolfers": "Economist, professor at University of Michigan, known for labor economics, macroeconomics, and public policy analysis",
+    "Betsey Stevenson": "Economist, professor at University of Michigan, former Chief Economist at the U.S. Department of Labor, expert in labor markets and family economics"
+  }
+}

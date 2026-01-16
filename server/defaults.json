@@ -1,0 +1,11 @@
+{
+  "numTitles": 20,
+  "numDescriptions": 5,
+  "numThumbnailTitles": 20,
+  "numFrames": 24,
+  "transcriptionModel": "gpt-4o-transcribe-diarize",
+  "chatModel": "gpt-4o",
+  "visionModel": "gpt-4.1",
+  "imageDetail": "auto",
+  "chunkMinutes": 4
+}

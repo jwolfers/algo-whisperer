@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Algo Whisperer - Video Metadata Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@700&family=Anton&family=Bangers&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>The Algo Whisperer</h1>
+      <p class="subtitle">Generate YouTube metadata from interview videos</p>
+      <button id="prompts-btn" class="icon-btn" title="Manage Prompts">📝</button>
+      <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
+    </header>
+
+    <main>
+      <!-- Upload Section -->
+      <section id="upload-section" class="section">
+        <div id="drop-zone" class="drop-zone">
+          <div class="drop-zone-content">
+            <span class="drop-icon">📹</span>
+            <p>Drag and drop a video file here</p>
+            <p class="or-text">or</p>
+            <label class="file-input-label">
+              <input type="file" id="file-input" accept="video/*" hidden>
+              <span class="btn btn-primary">Choose File</span>
+            </label>
+          </div>
+          <div id="upload-progress" class="upload-progress hidden">
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+            <span class="progress-text">Uploading... 0%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Video Player Section -->
+      <section id="player-section" class="section hidden">
+        <div class="section-header">
+          <h2>Video Preview</h2>
+          <button id="reset-btn" class="btn btn-icon btn-danger" title="Start over with a new video">
+            <span class="icon">🔄</span>
+            <span class="btn-text">Reset</span>
+          </button>
+        </div>
+        <div class="video-container">
+          <video id="video-player" controls></video>
+        </div>
+        <div class="video-info">
+          <span id="video-name"></span>
+          <span class="video-meta">
+            <span id="video-date"></span>
+            <span class="separator">|</span>
+            <span id="video-size"></span>
+            <span class="separator">|</span>
+            <span id="video-duration"></span>
+          </span>
+        </div>
+        <div id="processing-status" class="processing-status">
+          <span class="status-item" id="transcribe-status">Transcribing...</span>
+          <span class="status-item" id="frames-status">Extracting frames...</span>
+        </div>
+      </section>
+
+      <!-- Transcript Section -->
+      <section id="transcript-section" class="section hidden">
+        <div class="section-header">
+          <h2>Transcript</h2>
+          <button id="copy-transcript-btn" class="btn btn-icon" title="Copy transcript to clipboard">
+            <span class="icon">📋</span>
+            <span class="btn-text">Copy</span>
+          </button>
+        </div>
+        <div id="transcript-loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p>Transcribing video...</p>
+        </div>
+        <div id="transcript-container" class="transcript-container"></div>
+        <div class="action-buttons hidden">
+          <button id="generate-metadata-btn" class="btn btn-primary" disabled>Generate Metadata</button>
+        </div>
+      </section>
+
+      <!-- Metadata Section -->
+      <section id="metadata-section" class="section hidden">
+        <h2>Generated Descriptions</h2>
+        <div id="metadata-loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p>Generating metadata...</p>
+        </div>
+        <div id="metadata-container" class="metadata-container">
+          <div class="metadata-group">
+            <h3>Suggested Descriptions</h3>
+            <div id="video-summary" class="video-summary hidden"></div>
+            <div id="descriptions-heading" class="descriptions-heading hidden">Differentiated versions:</div>
+            <div id="descriptions-selector" class="description-selector"></div>
+            <div id="descriptions-content" class="description-content"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Frames Section -->
+      <section id="frames-section" class="section hidden">
+        <h2>Thumbnail Selection</h2>
+        <div id="frames-loading" class="loading hidden">
+          <div class="spinner"></div>
+          <p>Extracting and analyzing frames...</p>
+        </div>
+        <div id="frames-grid" class="frames-grid"></div>
+      </section>
+
+      <!-- Thumbnail Editor Section -->
+      <section id="thumbnail-section" class="section hidden">
+        <h2>Thumbnail Editor</h2>
+        <div id="thumbnail-editor-settings" class="thumbnail-editor-settings">
+          <div class="setting-item">
+            <label for="thumbnail-font">Font:</label>
+            <select id="thumbnail-font">
+              <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+              <option value="'Oswald', sans-serif">Oswald</option>
+              <option value="'Anton', sans-serif">Anton</option>
+              <option value="'Bangers', cursive">Bangers</option>
+              <option value="'Permanent Marker', cursive">Permanent Marker</option>
+              <option value="Impact, sans-serif">Impact</option>
+              <option value="Arial Black, sans-serif">Arial Black</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label for="thumbnail-bg-color">Background:</label>
+            <input type="color" id="thumbnail-bg-color" class="color-picker" value="#ffeb3b">
+          </div>
+          <div class="setting-item">
+            <label for="thumbnail-text-color">Text:</label>
+            <input type="color" id="thumbnail-text-color" class="color-picker" value="#000000">
+          </div>
+        </div>
+        <p class="editor-instruction">Click on a thumbnail title to apply it. Drag to move, drag bottom edge to resize, click text to edit:</p>
+        <div id="thumbnail-editors" class="thumbnail-editors"></div>
+        <div class="action-buttons">
+          <button id="download-thumbnails-btn" class="btn btn-primary">Download Thumbnails</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button id="close-settings" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-group">
+            <label for="num-titles">Number of Titles</label>
+            <input type="number" id="num-titles" min="1" max="50" value="20">
+          </div>
+          <div class="setting-group">
+            <label for="num-descriptions">Number of Descriptions</label>
+            <input type="number" id="num-descriptions" min="1" max="20" value="5">
+          </div>
+          <div class="setting-group">
+            <label for="num-thumbnail-titles">Number of Thumbnail Titles</label>
+            <input type="number" id="num-thumbnail-titles" min="1" max="50" value="20">
+          </div>
+          <div class="setting-group">
+            <label for="num-frames">Number of Frames to Extract</label>
+            <input type="number" id="num-frames" min="12" max="48" value="24">
+          </div>
+          <div class="setting-group">
+            <label for="transcription-model">Transcription Model</label>
+            <select id="transcription-model">
+              <option value="gpt-4o-transcribe-diarize">gpt-4o-transcribe-diarize</option>
+              <option value="gpt-4o-transcribe">gpt-4o-transcribe</option>
+              <option value="gpt-4o-mini-transcribe">gpt-4o-mini-transcribe</option>
+              <option value="whisper-1">whisper-1</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="chunk-minutes">Audio Chunk Size (minutes)</label>
+            <input type="number" id="chunk-minutes" min="1" max="15" value="4">
+            <span class="setting-hint">Shorter chunks = faster parallel processing</span>
+          </div>
+          <div class="setting-group">
+            <label for="chat-model">Chat Model (Responses API)</label>
+            <select id="chat-model">
+              <option value="gpt-4o">gpt-4o</option>
+              <option value="gpt-4o-mini">gpt-4o-mini</option>
+              <option value="gpt-4.1">gpt-4.1</option>
+              <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="vision-model">Vision Model</label>
+            <select id="vision-model">
+              <option value="gpt-4.1">gpt-4.1</option>
+              <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+              <option value="gpt-4o">gpt-4o</option>
+              <option value="gpt-4o-mini">gpt-4o-mini</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="image-detail">Image Detail Level</label>
+            <select id="image-detail">
+              <option value="auto">Auto (let model decide)</option>
+              <option value="low">Low (faster, 85 tokens per image)</option>
+              <option value="high">High (detailed analysis, more tokens)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="reset-defaults" class="btn btn-secondary">Reset to Defaults</button>
+          <button id="save-settings" class="btn btn-primary">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompts Modal -->
+    <div id="prompts-modal" class="modal hidden">
+      <div class="modal-content prompts-modal-content">
+        <div class="modal-header">
+          <h2>Manage Prompts</h2>
+          <button id="close-prompts" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <!-- Prompt Type Tabs -->
+          <div class="prompt-tabs">
+            <button class="prompt-tab active" data-type="metadata">Metadata</button>
+            <button class="prompt-tab" data-type="vision">Vision</button>
+            <button class="prompt-tab" data-type="transcription">Transcription</button>
+          </div>
+
+          <!-- Prompt Selection and Management -->
+          <div class="prompt-management">
+            <div class="prompt-selector">
+              <label>Active Prompt:</label>
+              <select id="active-prompt-select"></select>
+              <button id="add-prompt-btn" class="btn btn-secondary btn-small">+ Add New</button>
+            </div>
+
+            <div class="prompt-actions">
+              <button id="edit-prompt-btn" class="btn btn-secondary btn-small">Edit</button>
+              <button id="delete-prompt-btn" class="btn btn-secondary btn-small btn-danger">Delete</button>
+            </div>
+          </div>
+
+          <!-- Prompt Preview -->
+          <div id="prompt-preview" class="prompt-preview">
+            <h4>Prompt Preview</h4>
+            <div id="prompt-preview-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt Editor Modal -->
+    <div id="prompt-editor-modal" class="modal hidden">
+      <div class="modal-content prompt-editor-content">
+        <div class="modal-header">
+          <h2 id="prompt-editor-title">Edit Prompt</h2>
+          <button id="close-prompt-editor" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-group">
+            <label for="prompt-id">Prompt ID (unique identifier)</label>
+            <input type="text" id="prompt-id" placeholder="e.g., my-custom-prompt">
+          </div>
+          <div class="setting-group">
+            <label for="prompt-name">Display Name</label>
+            <input type="text" id="prompt-name" placeholder="e.g., My Custom Prompt">
+          </div>
+          <div id="prompt-fields"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancel-prompt-edit" class="btn btn-secondary">Cancel</button>
+          <button id="save-prompt-edit" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="version-footer">
+      <span id="version-info">Updated January 12, 2025</span>
+    </footer>
+  </div>
+
+  <script src="js/prompts.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/uploader.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/transcript.js"></script>
+  <script src="js/metadata.js"></script>
+  <script src="js/thumbnails.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: algo-whisperer
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: ALLOWED_ORIGINS
+        sync: false  # Set manually to your Render URL after first deploy

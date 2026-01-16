@@ -1,0 +1,19 @@
+{
+  "known_speakers": [
+    {
+      "name": "Justin Wolfers",
+      "sample_file": "justin-wolfers.wav"
+    },
+    {
+      "name": "Betsey Stevenson",
+      "sample_file": "betsey-stevenson.wav"
+    }
+  ],
+  "unknown_speaker_labels": [
+    "Interviewer",
+    "Speaker A",
+    "Speaker B",
+    "Speaker C"
+  ],
+  "instructions": "Transcribe this audio with speaker diarization. Identify speakers Justin Wolfers and Betsey Stevenson using the provided voice samples. Label any other speakers as Interviewer (if asking questions) or Speaker A, B, C etc."
+}
