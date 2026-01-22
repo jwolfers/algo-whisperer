@@ -4,9 +4,9 @@ const Uploader = {
   sessionId: null,
   filename: null,
 
-  // Configurable settings
-  CHUNK_SIZE: 10 * 1024 * 1024, // 10MB chunks
-  MAX_PARALLEL_UPLOADS: 6, // Number of concurrent chunk uploads
+  // Configurable settings (tuned for fast connections)
+  CHUNK_SIZE: 20 * 1024 * 1024, // 20MB chunks - fewer requests
+  MAX_PARALLEL_UPLOADS: 10, // Number of concurrent chunk uploads
   MIN_FILE_SIZE_FOR_CHUNKING: 50 * 1024 * 1024, // Use chunked upload for files > 50MB
 
   init() {

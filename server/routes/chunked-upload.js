@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
+const { pipeline } = require('stream/promises');
 const { v4: uuidv4 } = require('uuid');
 const { UPLOADS_DIR, isValidSessionId } = require('../lib/security');
 
@@ -148,21 +149,16 @@ router.post('/upload/complete', async (req, res) => {
   const finalPath = path.join(UPLOADS_DIR, finalFilename);
 
   try {
-    // Assemble chunks into final file
+    // Assemble chunks into final file using streams (memory efficient)
     const writeStream = fs.createWriteStream(finalPath);
 
     for (let i = 0; i < upload.totalChunks; i++) {
       const chunkPath = path.join(upload.chunksDir, `chunk_${i.toString().padStart(6, '0')}`);
-      const chunkData = await fsPromises.readFile(chunkPath);
-      writeStream.write(chunkData);
+      const readStream = fs.createReadStream(chunkPath);
+      await pipeline(readStream, writeStream, { end: false });
     }
 
-    await new Promise((resolve, reject) => {
-      writeStream.end((err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    writeStream.end();
 
     // Get final file size
     const stats = await fsPromises.stat(finalPath);
