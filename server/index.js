@@ -21,6 +21,7 @@ const promptsLibraryPath = path.join(__dirname, 'prompts-library.json');
 const transcribeRoutes = require('./routes/transcribe');
 const generateRoutes = require('./routes/generate');
 const extractFramesRoutes = require('./routes/extract-frames');
+const chunkedUploadRoutes = require('./routes/chunked-upload');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -82,6 +83,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api', transcribeRoutes);
 app.use('/api', generateRoutes);
 app.use('/api', extractFramesRoutes);
+app.use('/api', chunkedUploadRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
