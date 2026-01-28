@@ -80,7 +80,8 @@ const Thumbnails = {
       });
 
       if (!extractResponse.ok) {
-        throw new Error('Frame extraction failed');
+        const errorData = await extractResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Frame extraction failed');
       }
 
       const extractResult = await extractResponse.json();
@@ -107,7 +108,8 @@ const Thumbnails = {
       });
 
       if (!analyzeResponse.ok) {
-        throw new Error('Frame analysis failed');
+        const errorData = await analyzeResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Frame analysis failed');
       }
 
       const analyzeResult = await analyzeResponse.json();
@@ -134,7 +136,28 @@ const Thumbnails = {
     } catch (error) {
       console.error('Frame extraction error:', error);
       if (!isAdditional) {
-        grid.innerHTML = `<p class="error">Frame extraction failed: ${error.message}</p>`;
+        grid.innerHTML = `
+          <div class="extraction-error">
+            <p class="error">Frame extraction failed: ${error.message}</p>
+            <button class="btn btn-primary retry-extraction-btn">Try Again</button>
+          </div>
+        `;
+        grid.querySelector('.retry-extraction-btn').addEventListener('click', () => {
+          this.extractFrames(false);
+        });
+      } else {
+        // For additional batches, show error but keep existing frames
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'extraction-error';
+        errorDiv.innerHTML = `
+          <p class="error">Failed to load more images: ${error.message}</p>
+          <button class="btn btn-secondary retry-extraction-btn">Try Again</button>
+        `;
+        errorDiv.querySelector('.retry-extraction-btn').addEventListener('click', () => {
+          errorDiv.remove();
+          this.extractFrames(true);
+        });
+        grid.appendChild(errorDiv);
       }
     } finally {
       loading.classList.add('hidden');

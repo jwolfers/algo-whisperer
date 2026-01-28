@@ -1264,3 +1264,24 @@ header .subtitle {
     flex-wrap: wrap;
   }
 }
+
+/* Extraction error with retry button */
+.extraction-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.extraction-error .error {
+  color: var(--error);
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+
+.extraction-error .retry-extraction-btn {
+  margin-top: 8px;
+}

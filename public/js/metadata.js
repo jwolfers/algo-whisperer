@@ -195,12 +195,45 @@ const Metadata = {
   copyDescriptionToClipboard(button) {
     const container = document.getElementById('descriptions-content');
     const text = container.dataset.description;
-    navigator.clipboard.writeText(text).then(() => {
+
+    // Try modern clipboard API first, fall back to execCommand
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        button.textContent = 'Copied!';
+        setTimeout(() => {
+          button.textContent = 'Copy to Clipboard';
+        }, 1000);
+      }).catch((err) => {
+        console.error('Clipboard API failed:', err);
+        this.fallbackCopyToClipboard(text, button);
+      });
+    } else {
+      this.fallbackCopyToClipboard(text, button);
+    }
+  },
+
+  fallbackCopyToClipboard(text, button) {
+    // Fallback for older browsers or insecure contexts
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
       button.textContent = 'Copied!';
       setTimeout(() => {
         button.textContent = 'Copy to Clipboard';
       }, 1000);
-    });
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+      button.textContent = 'Copy failed';
+      setTimeout(() => {
+        button.textContent = 'Copy to Clipboard';
+      }, 2000);
+    }
+    document.body.removeChild(textarea);
   },
 
   renderList(containerId, items) {
