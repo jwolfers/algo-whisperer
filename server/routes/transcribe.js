@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-const { openai, loadPrompt, audioToDataUrl } = require('../lib/openai');
+const { openai, loadPrompt, audioToDataUrl, parseOpenAIError } = require('../lib/openai');
 const { extractAudio, getAudioDuration, getFileSize, splitAudioIntoChunks } = require('../lib/ffmpeg');
 
 // Hard limits for OpenAI transcription API (these always apply regardless of user settings)
@@ -279,7 +279,17 @@ router.post('/transcribe', aiRateLimit, async (req, res) => {
     // Clean up audio file and any chunk files on error
     cleanupFiles([audioPath, ...chunkFiles]);
 
-    // Provide more helpful error message
+    // Check for OpenAI billing/quota errors first
+    const parsedError = parseOpenAIError(error);
+    if (parsedError.isBillingError || parsedError.billingUrl) {
+      return res.status(500).json({
+        error: parsedError.userMessage,
+        billingUrl: parsedError.billingUrl,
+        isBillingError: parsedError.isBillingError,
+      });
+    }
+
+    // Provide more helpful error message for other errors
     let errorMessage = error.message;
     if (error.message.includes('timeout') || error.message.includes('Timeout')) {
       errorMessage = `Transcription timed out. The audio file may be too long. Try a shorter video.`;

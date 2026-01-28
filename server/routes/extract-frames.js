@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const { openai, imageToDataUrl } = require('../lib/openai');
+const { openai, imageToDataUrl, parseOpenAIError } = require('../lib/openai');
 const { extractFrames } = require('../lib/ffmpeg');
 const { safeUploadPath, safeFramesPath, isValidFilename, isValidSessionId } = require('../lib/security');
 const { aiRateLimit } = require('../lib/rate-limit');
@@ -156,7 +156,12 @@ router.post('/analyze-frames', aiRateLimit, async (req, res) => {
     });
   } catch (error) {
     console.error('Frame analysis error:', error);
-    res.status(500).json({ error: error.message });
+    const parsedError = parseOpenAIError(error);
+    res.status(500).json({
+      error: parsedError.userMessage,
+      billingUrl: parsedError.billingUrl,
+      isBillingError: parsedError.isBillingError,
+    });
   }
 });
 

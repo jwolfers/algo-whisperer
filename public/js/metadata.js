@@ -35,11 +35,14 @@ const Metadata = {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Metadata generation failed');
-      }
-
       const result = await response.json();
+
+      if (!response.ok) {
+        const error = new Error(result.error || 'Metadata generation failed');
+        error.billingUrl = result.billingUrl;
+        error.isBillingError = result.isBillingError;
+        throw error;
+      }
       this.data = result.metadata;
 
       // Generate AI summaries for descriptions (runs in parallel with rendering initial state)
@@ -54,7 +57,24 @@ const Metadata = {
       }
     } catch (error) {
       console.error('Metadata generation error:', error);
-      alert('Metadata generation failed: ' + error.message);
+      if (error.billingUrl) {
+        container.innerHTML = `
+          <div class="billing-error">
+            <p class="error">${error.message}</p>
+            <a href="${error.billingUrl}" target="_blank" class="btn btn-primary">Add Funds to OpenAI Account</a>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="extraction-error">
+            <p class="error">Metadata generation failed: ${error.message}</p>
+            <button class="btn btn-primary retry-btn">Try Again</button>
+          </div>
+        `;
+        container.querySelector('.retry-btn').addEventListener('click', () => {
+          this.generate();
+        });
+      }
     } finally {
       loading.classList.add('hidden');
     }

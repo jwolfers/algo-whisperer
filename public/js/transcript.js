@@ -66,11 +66,14 @@ const Transcript = {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Transcription failed');
-      }
-
       const result = await response.json();
+
+      if (!response.ok) {
+        const error = new Error(result.error || 'Transcription failed');
+        error.billingUrl = result.billingUrl;
+        error.isBillingError = result.isBillingError;
+        throw error;
+      }
       this.data = result.transcript;
 
       // Render transcript
@@ -84,7 +87,24 @@ const Transcript = {
       Metadata.generate();
     } catch (error) {
       console.error('Transcription error:', error);
-      container.innerHTML = `<p class="error">Transcription failed: ${error.message}</p>`;
+      if (error.billingUrl) {
+        container.innerHTML = `
+          <div class="billing-error">
+            <p class="error">${error.message}</p>
+            <a href="${error.billingUrl}" target="_blank" class="btn btn-primary">Add Funds to OpenAI Account</a>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="extraction-error">
+            <p class="error">Transcription failed: ${error.message}</p>
+            <button class="btn btn-primary retry-btn">Try Again</button>
+          </div>
+        `;
+        container.querySelector('.retry-btn').addEventListener('click', () => {
+          this.startTranscription();
+        });
+      }
     } finally {
       loading.classList.add('hidden');
     }

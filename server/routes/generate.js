@@ -1,5 +1,5 @@
 const express = require('express');
-const { openai, loadActivePrompt } = require('../lib/openai');
+const { openai, loadActivePrompt, parseOpenAIError } = require('../lib/openai');
 const { aiRateLimit } = require('../lib/rate-limit');
 
 const router = express.Router();
@@ -184,7 +184,12 @@ ${transcriptText}`;
     });
   } catch (error) {
     console.error('Metadata generation error:', error.message);
-    res.status(500).json({ error: error.message });
+    const parsedError = parseOpenAIError(error);
+    res.status(500).json({
+      error: parsedError.userMessage,
+      billingUrl: parsedError.billingUrl,
+      isBillingError: parsedError.isBillingError,
+    });
   }
 });
 
@@ -239,7 +244,12 @@ router.post('/generate/refine', aiRateLimit, async (req, res) => {
     });
   } catch (error) {
     console.error('Refinement error:', error.message);
-    res.status(500).json({ error: error.message });
+    const parsedError = parseOpenAIError(error);
+    res.status(500).json({
+      error: parsedError.userMessage,
+      billingUrl: parsedError.billingUrl,
+      isBillingError: parsedError.isBillingError,
+    });
   }
 });
 
@@ -326,7 +336,12 @@ ${descriptionsText}`;
     });
   } catch (error) {
     console.error('Description summary error:', error.message);
-    res.status(500).json({ error: error.message });
+    const parsedError = parseOpenAIError(error);
+    res.status(500).json({
+      error: parsedError.userMessage,
+      billingUrl: parsedError.billingUrl,
+      isBillingError: parsedError.isBillingError,
+    });
   }
 });
 

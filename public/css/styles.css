@@ -1285,3 +1285,29 @@ header .subtitle {
 .extraction-error .retry-extraction-btn {
   margin-top: 8px;
 }
+
+/* Billing error with link to add funds */
+.billing-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  width: 100%;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.billing-error .error {
+  color: var(--error);
+  margin-bottom: 16px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.billing-error .btn {
+  margin-top: 8px;
+}

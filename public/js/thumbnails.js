@@ -107,12 +107,14 @@ const Thumbnails = {
         }),
       });
 
-      if (!analyzeResponse.ok) {
-        const errorData = await analyzeResponse.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Frame analysis failed');
-      }
-
       const analyzeResult = await analyzeResponse.json();
+
+      if (!analyzeResponse.ok) {
+        const error = new Error(analyzeResult.error || 'Frame analysis failed');
+        error.billingUrl = analyzeResult.billingUrl;
+        error.isBillingError = analyzeResult.isBillingError;
+        throw error;
+      }
       const newRankedFrames = analyzeResult.rankedFrames;
 
       // Add new ranked frames as a new batch
@@ -135,7 +137,15 @@ const Thumbnails = {
       }
     } catch (error) {
       console.error('Frame extraction error:', error);
-      if (!isAdditional) {
+      if (error.billingUrl) {
+        // Billing error - show link to add funds
+        grid.innerHTML = `
+          <div class="billing-error">
+            <p class="error">${error.message}</p>
+            <a href="${error.billingUrl}" target="_blank" class="btn btn-primary">Add Funds to OpenAI Account</a>
+          </div>
+        `;
+      } else if (!isAdditional) {
         grid.innerHTML = `
           <div class="extraction-error">
             <p class="error">Frame extraction failed: ${error.message}</p>
